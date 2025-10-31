@@ -77,11 +77,9 @@ bot.onText(/\/allGamers (.+)/, async (msg, match) => {
         playerStats.forEach((stat, index) => {
             const player = stat.User;
             const totalScore = stat.dataValues.totalScore;
-            const gamesPlayed = stat.dataValues.gamesPlayed;
 
             response += `${index + 1}. ${player.name}\n`;
-            response += `   💰 Очков: ${totalScore}\n`;
-            response += `   🎯 Игр: ${gamesPlayed}\n\n`;
+            response += `   💰 Очков: ${totalScore}\n\n`;
         });
 
         await bot.sendMessage(msg.chat.id, response);
