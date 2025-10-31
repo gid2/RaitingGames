@@ -1,30 +1,37 @@
 const TelegramBot = require('node-telegram-bot-api');
+const express = require('express');
 const { sequelize, User, Game, GameScore } = require('../models');
 
-// 🔒 БЕЗОПАСНОСТЬ: Используем переменные окружения
-const TOKEN = process.env.BOT_TOKEN || '7342883981:AAFAq5VPOIAxm38tz-SCJAzhJoV8B7uC_N4';
+const TOKEN = process.env.BOT_TOKEN;
+const bot = new TelegramBot(TOKEN, { polling: true });
 
-const bot = new TelegramBot(TOKEN, {
-    polling: true,
-    // Настройки для продакшена
-    request: {
-        timeout: 30000,
-        agentOptions: {
-            keepAlive: true,
-            family: 4
-        }
-    }
+// 🔧 ДОБАВЬТЕ ВЕБ-СЕРВЕР ДЛЯ RENDER
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+app.get('/', (req, res) => {
+    res.json({
+        status: 'Bot is running',
+        service: 'Telegram Game Score Bot',
+        timestamp: new Date().toISOString()
+    });
 });
 
+app.get('/health', (req, res) => {
+    res.json({ status: 'healthy' });
+});
+
+app.listen(PORT, () => {
+    console.log(`🚀 Web server running on port ${PORT}`);
+});
+
+// ВАШ СУЩЕСТВУЮЩИЙ КОД БОТА
 const initDatabase = async () => {
     try {
         await sequelize.authenticate();
         console.log('✅ База данных подключена');
-
-        // В ПРОДАКШЕНЕ НИКОГДА НЕ ИСПОЛЬЗУЙТЕ force: true!
         await sequelize.sync({ force: false });
         console.log('✅ Модели синхронизированы');
-
     } catch (error) {
         console.log('❌ Ошибка БД:', error);
     }
