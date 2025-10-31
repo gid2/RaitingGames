@@ -52,12 +52,12 @@ bot.onText(/\/allGamers (.+)/, async (msg, match) => {
             );
         }
 
-        // 🔧 ИСПРАВЛЕНИЕ: Группируем по игрокам и суммируем очки
+        // 🔧 ИСПРАВЛЕНИЕ: Указываем конкретную таблицу для COUNT
         const playerStats = await GameScore.findAll({
             attributes: [
                 'userId',
                 [sequelize.fn('SUM', sequelize.col('score')), 'totalScore'],
-                [sequelize.fn('COUNT', sequelize.col('id')), 'gamesPlayed']
+                [sequelize.fn('COUNT', sequelize.col('GameScore.id')), 'gamesPlayed'] // ЯВНО УКАЗЫВАЕМ ТАБЛИЦУ
             ],
             where: { gameId: game.id },
             include: [User],
@@ -68,7 +68,7 @@ bot.onText(/\/allGamers (.+)/, async (msg, match) => {
         if (playerStats.length === 0) {
             return await bot.sendMessage(
                 msg.chat.id,
-                `📊 В игре "${gameName}" пока нет игроков.\nДобавьте первого: /newGamer Имя ${gameName}`
+                `📊 В игре "${gameName}" пока нет игроков.\nДобавьте первого игрока: /newGamer Имя ${gameName}`
             );
         }
 
@@ -90,7 +90,6 @@ bot.onText(/\/allGamers (.+)/, async (msg, match) => {
         await bot.sendMessage(msg.chat.id, '❌ Ошибка при получении списка игроков');
     }
 });
-
 // 👤 ДОБАВИТЬ ИГРОКА В КОНКРЕТНУЮ ИГРУ
 bot.onText(/\/newGamer (.+) (.+)/, async (msg, match) => {
     const playerName = match[1].trim();
